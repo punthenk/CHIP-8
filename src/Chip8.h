@@ -22,7 +22,8 @@ public:
     uint8_t key[16];                            // Keep track of the current state of the key
 
     void initialize();                          // Initialize registers and memory once
-    void loadROM(const char* file_name);        // Load FILE into memory
+    void loadROM(const char* file_path);        // Load FILE into memory
+    void emulateCycle();
 
 private:
     const unsigned int START_ADDRESS = 0x200;   // Load the ROM memory starts at 0x200
