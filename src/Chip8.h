@@ -21,6 +21,8 @@ public:
     uint8_t gfx[64 * 32];                       // (64 * 32) 2048 pixels for the graphics
     uint8_t key[16];                            // Keep track of the current state of the key
 
+    bool drawFlag = false;                      // Keep track of the current draw state
+
     void initialize();                          // Initialize registers and memory once
     void loadROM(const char* file_path);        // Load FILE into memory
     void emulateCycle();
