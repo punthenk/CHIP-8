@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <stdint.h>
 
 class Chip8 {
 public:

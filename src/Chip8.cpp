@@ -6,7 +6,7 @@
 #include <iostream>
 #include <string>
 
-unsigned char chip8_fontset[80] =
+uint8_t chip8_fontset[80] =
 {
     0xF0, 0x90, 0x90, 0x90, 0xF0, //0
     0x20, 0x60, 0x20, 0x20, 0x70, //1
@@ -316,12 +316,78 @@ void Chip8::emulateCycle() {
             }
             break;
 
-        case 0x0033:
-            memory[I]     = V[(opcode & 0x0F00) >> 8] / 100;
-            memory[I + 1] = (V[(opcode & 0x0F00) >> 8] / 10) % 10;
-            memory[I + 2] = (V[(opcode & 0x0F00) >> 8] % 100) % 10;
-            pc += 2;
+        case 0xF000:
+            switch (opcode & 0x00FF) {
+                case 0x0007: // (0xFX07) Sets VX to the value of the delay timer
+                    V[(opcode & 0x0F00) >> 8] = delay_timer;
+                    pc += 2;
+                    break;
+
+                case 0x000A: { // (0xFX0A) A key press is awaited, and then stored in VX
+                               // (blocking operation, all instruction halted until next key event, delay and sound timers should continue processing)
+                    bool key_pressed = false;
+                    for (int i = 0; i < 16; i++) {
+                        if (key[i] != 0) {
+                            V[(opcode & 0x0F00) >> 8] = i;
+                            key_pressed = true;
+                        }
+                    }
+
+                    if (!key_pressed)
+                        return;
+
+                    pc += 2;
+                    break;
+                }
+
+                case 0x0015: // (0xFX15) Sets the delay timer to VX
+                    delay_timer = V[(opcode & 0x0F00) >> 8];
+                    pc += 2;
+                    break;
+
+                case 0x0018: // (0xFX18) Sets the sound timer to VX
+                    sound_timer = V[(opcode & 0x0F00) >> 8];
+                    pc += 2;
+                    break;
+
+                case 0x001E: // (0xFX1E) Adds VX to I. VF is not affected
+                    I += V[(opcode & 0x0F00) >> 8];
+                    pc += 2;
+                    break;
+
+                case 0x0029: // (0xFX29) Sets I to the location of the sprite for the character in VX
+                             // (only consider the lowest nibble). Characters 0-F (in hexadecimal) are represented by a 4x5 font
+                    I = V[(opcode & 0x0F00) >> 8] * 0.5;
+                    pc += 2;
+                    break;
+
+                case 0x0033: // (0xFX33) Stores the binary-coded decimal representation of VX, with the hundreds digit in memory
+                             // at location in I, the tens digit at location I+1, and the ones digit at location I+2
+                    memory[I] = V[(opcode & 0x0F00) >> 8] / 100;
+                    memory[I + 1] = (V[(opcode & 0x0F00) >> 8] / 10) % 10;
+                    memory[I + 2] = (V[(opcode & 0x0F00) >> 8] % 100) % 10;
+                    pc += 2;
+                    break;
+
+                case 0x0055: // (0xFX55) Stores from V0 to VX (including VX) in memory, starting at address I.
+                               // The offset from I is increased by 1 for each value written, but I itself is left unmodified
+                    for (int i = 0; i <= ((opcode & 0x0F00) >> 8); i++) {
+                        memory[I + i] = V[i];
+                    }
+                    break;
+
+                case 0x0065: // (0xFX65) Fills from V0 to VX (including VX) with values from memory, starting at address I.
+                             // The offset from I is increased by 1 for each value read, but I itself is left unmodified
+                    for (int i = 0; i <= ((opcode & 0x0F00) >> 8); i++) {
+                        V[i] = memory[I + i];
+                    }
+                    break;
+
+            }
             break;
+
+
+
     }
 
     if (delay_timer > 0)
