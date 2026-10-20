@@ -23,7 +23,7 @@ public:
     bool drawFlag = false;                      // Keep track of the current draw state
 
     void initialize();                          // Initialize registers and memory once
-    void loadROM(const char* file_path);        // Load FILE into memory
+    bool loadROM(const char* file_path);        // Load FILE into memory
     void emulateCycle();
 
 private:
