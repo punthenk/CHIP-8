@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
             // Store pixels in temporary buffer
             for (int i = 0; i < 2048; i++) {
                 uint8_t pixel = chip8.gfx[i];
-                pixels[i] = (0x00FFFFFF * pixel) | 0xFF000000;
+                pixels[i] = (0xFFFFFFFF * pixel) | 0x000000FF;
             }
 
             SDL_UpdateTexture(p_texture, nullptr, pixels, 64 * sizeof(uint32_t));
