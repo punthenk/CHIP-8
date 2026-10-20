@@ -124,6 +124,7 @@ void Chip8::emulateCycle() {
                     for (int i = 0; i < 2048; i++) {
                         gfx[i] = 0;
                     }
+                    drawFlag = true;
                     pc += 2;
                     break;
             case 0x00EE: // (0x00EE) Returns from subroutine
