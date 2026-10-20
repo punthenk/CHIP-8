@@ -25,8 +25,8 @@ uint8_t keymap[16] =
     SDLK_v,
 };
 
-int const WIN_WIDTH = 800;
-int const WIN_HEIGHT = 600;
+int const WIN_WIDTH = 1024;
+int const WIN_HEIGHT = 512;
 
 int main(int argc, char *argv[]) {
     char* rom_file_path;

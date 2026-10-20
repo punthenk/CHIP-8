@@ -140,9 +140,9 @@ void Chip8::emulateCycle() {
                     pc += 2;
                     break;
                 case 0x00EE: // (0x00EE) Returns from subroutine
-                    stack[sp] = 0;
                     sp--;
                     pc = stack[sp];
+                    pc += 2;
                     break;
                 default:
                     printf("Unknown opcode [0x0000]: 0x%X\n", opcode);
@@ -240,7 +240,7 @@ void Chip8::emulateCycle() {
                 case 0x0006:
                     // (0x8XY6) Shifts VX to the right by 1, then stores the least significant bit of VX prior to the shift into VF
                     V[0xF] = (V[opcode & 0x0F00]) >> 8 & 0x01;
-                    V[opcode & 0x0F00] = (opcode & 0x0F00) << 1;
+                    V[(opcode & 0x0F00) >> 8] = (opcode & 0x0F00) << 1;
                     pc += 2;
                     break;
 
@@ -315,7 +315,7 @@ void Chip8::emulateCycle() {
         }
 
         case 0xE000:
-            switch (opcode & 0x0FFF) {
+            switch (opcode & 0x00FF) {
                 case 0x009E: // (0xEX9E) Skips the next instruction if the key stored in VX(only consider the lowest nibble) is pressed
                     if (key[V[(opcode & 0x0F00) >> 8]] != 0)
                         pc += 4;
@@ -324,7 +324,7 @@ void Chip8::emulateCycle() {
 
                     break;
 
-                case 0x0001: // (0xEXA1) Skips the next instruction if the key stored in VX(only consider the lowest nibble) is not pressed
+                case 0x00A1: // (0xEXA1) Skips the next instruction if the key stored in VX(only consider the lowest nibble) is not pressed
                     if (key[V[(opcode & 0x0F00) >> 8]] == 0)
                         pc += 4;
                     else
@@ -351,6 +351,7 @@ void Chip8::emulateCycle() {
                         if (key[i] != 0) {
                             V[(opcode & 0x0F00) >> 8] = i;
                             key_pressed = true;
+                            break;
                         }
                     }
 
@@ -391,10 +392,11 @@ void Chip8::emulateCycle() {
                     break;
 
                 case 0x0055: // (0xFX55) Stores from V0 to VX (including VX) in memory, starting at address I.
-                               // The offset from I is increased by 1 for each value written, but I itself is left unmodified
+                             // The offset from I is increased by 1 for each value written, but I itself is left unmodified
                     for (int i = 0; i <= ((opcode & 0x0F00) >> 8); i++) {
                         memory[I + i] = V[i];
                     }
+                    pc += 2;
                     break;
 
                 case 0x0065: // (0xFX65) Fills from V0 to VX (including VX) with values from memory, starting at address I.
