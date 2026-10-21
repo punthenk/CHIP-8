@@ -379,7 +379,7 @@ void Chip8::emulateCycle() {
 
                 case 0x0029: // (0xFX29) Sets I to the location of the sprite for the character in VX
                              // (only consider the lowest nibble). Characters 0-F (in hexadecimal) are represented by a 4x5 font
-                    I = V[(opcode & 0x0F00) >> 8] * 0.5;
+                    I = V[(opcode & 0x0F00) >> 8] * 5;
                     pc += 2;
                     break;
 
