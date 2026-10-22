@@ -4,7 +4,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
-#include <string>
 
 uint8_t chip8_fontset[80] =
 {
@@ -212,8 +211,7 @@ void Chip8::emulateCycle() {
                     pc += 2;
                     break;
 
-                case 0x0004:
-                    // (0x8XY4) Adds VY to VX. VF is set to 1 when there's an overflow, and to 0 when there is not
+                case 0x0004: // (0x8XY4) Adds VY to VX. VF is set to 1 when there's an overflow, and to 0 when there is not
                     if ((V[(opcode & 0x00F0) >> 4]) > ((0xFF) - V[(opcode & 0x0F00) >> 8]))
                         V[0xF] = 1;
                     else
@@ -225,19 +223,18 @@ void Chip8::emulateCycle() {
 
                 case 0x0005: // (0x8XY5) VY is subtracted from VX. VF is set to 0 when there's an underflow,
                     // and 1 when there is not. (i.e. VF set to 1 if VX >= VY and 0 if not).
-                    if (V[(opcode & 0x0F00) >> 8] >= V[(opcode & 0x00F0) >> 4])
-                        V[0xF] = 1;
-                    else
+                    if (V[(opcode & 0x00F0) >> 4] > V[(opcode & 0x0F00) >> 8])
                         V[0xF] = 0;
+                    else
+                        V[0xF] = 1;
 
                     V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
                     pc += 2;
                     break;
 
-                case 0x0006:
-                    // (0x8XY6) Shifts VX to the right by 1, then stores the least significant bit of VX prior to the shift into VF
-                    V[0xF] = (V[opcode & 0x0F00]) >> 8 & 0x01;
-                    V[(opcode & 0x0F00) >> 8] = (opcode & 0x0F00) << 1;
+                case 0x0006: // (0x8XY6) Shifts VX to the right by 1, then stores the least significant bit of VX prior to the shift into VF
+                    V[0xF] = V[(opcode & 0x0F00) >> 8] & 0x01;
+                    V[(opcode & 0x0F00) >> 8] >>= 1;
                     pc += 2;
                     break;
 
@@ -254,8 +251,8 @@ void Chip8::emulateCycle() {
 
                 case 0x000E: // (0x8XYE) Shifts VX to the left by 1, then sets VF to 1 if the most significant bit
                     // of VX prior to that shift was set, or to 0 if it was unset
-                    V[0xF] = (V[(opcode & 0x0F00) >> 8] & 0x80) >> 7;
-                    V[(V[opcode & 0x0F00]) >> 8] <<= 1;
+                    V[0xF] = V[(opcode & 0x0F00) >> 8] >> 7;
+                    V[V[(opcode & 0x0F00) >> 8]] <<= 1;
                     pc += 2;
                     break;
 
@@ -281,7 +278,7 @@ void Chip8::emulateCycle() {
             break;
 
         case 0xC000: // (0xCXNN) Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN
-            V[(opcode & 0x0F00) >> 8] &= rand() % 256;
+            V[(opcode & 0x0F00) >> 8] = rand() % 256 & (opcode & 0x00FF);
             pc += 2;
             break;
 
