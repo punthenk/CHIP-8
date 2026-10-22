@@ -118,14 +118,11 @@ void Chip8::emulateCycle() {
     /// is specified by the first cyfer of the code, in this example A (0x(A)2F0). The other 3 cyfers are more specific
     /// of what needs to happen for that specific goal. So now the switch statement can filter on the first cyfer.
 
-    // printf("Opcode called  : 0x%X\n", opcode);
-    // printf("Program counter: %X\n", pc);
+    if (delay_timer > 0)
+        delay_timer--;
 
-    for (int i = 0; i < 16; i++) {
-        if (key[i] == 1) {
-            std::cout << "KEY: " << i << "is pressed" << "\n";
-        }
-    }
+    if (sound_timer > 0)
+        sound_timer--;
 
     // Decode the opcode
     switch (opcode & 0xF000) {
@@ -411,15 +408,5 @@ void Chip8::emulateCycle() {
                     printf("Unknown opcode [0x0000]: 0x%X\n", opcode);
             }
             break;
-    }
-
-    if (delay_timer > 0)
-        delay_timer--;
-
-    if (sound_timer > 0) {
-        if (sound_timer == 1)
-            std::cout << "BEEP!\n";
-
-        sound_timer--;
     }
 }

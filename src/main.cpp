@@ -3,7 +3,10 @@
 #include <SDL2/SDL.h>
 #include <thread>
 
+#include "Audio.h"
+
 Chip8 chip8;
+Audio audio;
 
 uint8_t keymap[16] =
 {
@@ -83,8 +86,32 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    // Initialize SDL audio
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+        std::cerr << "SDL2 could not initialize audio: " << SDL_GetError() << std::endl;
+        return 1;
+    }
+
+    SDL_AudioSpec want;
+    SDL_AudioSpec have;
+
+    SDL_zero(want);
+    want.freq = audio.SAMPLE_RATE;
+    want.format = AUDIO_S16SYS; // 16-bit getekende integers (system byte order)
+    want.channels = 1;          // Mono geluid is voldoende voor CHIP-8
+    want.samples = 2048;        // Buffergrootte (lage latency)
+    want.callback = Audio::audio_callback;
+    want.userdata = &audio;
+
+    SDL_AudioDeviceID device = SDL_OpenAudioDevice(nullptr, 0, &want, &have, 0);
+    if (device == 0) {
+        std::cerr << "Could not open audio device: " << SDL_GetError() << std::endl;
+        return 1;
+    }
+
     // Temporary pixel buffer
     uint32_t pixels[2048];
+    uint8_t sound_timer = 0;
 
     if (!chip8.loadROM(rom_file_path)) {
         std::cerr << "Failed to load the ROM" << std::endl;
@@ -120,6 +147,13 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        if (chip8.sound_timer > 0) {
+            SDL_PauseAudioDevice(device, 0);
+            SDL_Delay(16);
+        }
+
+        SDL_PauseAudioDevice(device, 1);
+
         if (chip8.drawFlag) {
             chip8.drawFlag = false;
 
@@ -137,7 +171,6 @@ int main(int argc, char *argv[]) {
 
 
         std::this_thread::sleep_for(std::chrono::microseconds(1200));
-        // chip8.setKeys();
     }
     return 0;
 }

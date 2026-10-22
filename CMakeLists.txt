@@ -9,6 +9,7 @@ find_package(SDL2 REQUIRED CONFIG)
 add_executable(chip-8
     src/main.cpp
     src/Chip8.cpp
+    src/Audio.cpp
 )
 
 target_include_directories(chip-8 PRIVATE src)
