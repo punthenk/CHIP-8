@@ -1,6 +1,12 @@
 # CHIP-8
 This is a working implementation of the CHIP-8 Emulator I wrote myself in C++.
 
+# Screenshots
+PONG2
+![Alt Text](docs/screenshots/PONG2_screenshot.png)
+BRIX (Breakout)
+![Alt Text](docs/screenshots/BRIX_screenshot.png)
+
 ---
 ## Compiling and run the emulator
 **Requirements:**
